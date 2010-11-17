@@ -1,0 +1,34 @@
+PATH
+  remote: /Users/david/Code/sinatra-cli
+  specs:
+    sinatra-cli (0.0.1)
+
+GEM
+  remote: http://rubygems.org/
+  specs:
+    configuration (1.1.0)
+    heroku (1.7.0)
+      json_pure (~> 1.2.0)
+      launchy (~> 0.3.2)
+      rest-client (~> 1.2)
+    json (1.4.6)
+    json_pure (1.2.4)
+    launchy (0.3.7)
+      configuration (>= 0.0.5)
+      rake (>= 0.8.1)
+    mime-types (1.16)
+    rack (1.2.1)
+    rake (0.8.7)
+    rest-client (1.6.1)
+      mime-types (>= 1.16)
+    sinatra (1.0)
+      rack (>= 1.0)
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  heroku
+  json
+  sinatra
+  sinatra-cli!

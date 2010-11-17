@@ -1,25 +1,47 @@
+require "heroku"
 require "sinatra"
 require "sinatra/cli"
 
 extend Sinatra::CLI
 
-Dir[File.expand_path("../lib/namespace/*.rb", __FILE__)].each do |namespace|
-  require namespace
+def heroku
+  @heroku ||= Heroku::Client.new("david+smoke@heroku.com", "12345")
 end
 
-register_namespace :app, Namespace::App
+group "General Commands" do
 
-post "/command/:namespace/*" do
-  request.env['cli.auth'] = { :username => "david+smoke@heroku.com", :password => "12345" }
+  command "create [NAME]", "create a new application" do
 
-  status, headers, body = execute_namespace(
-    request,
-    params[:namespace],
-    params[:splat].first,
-    params[:params]
-  )
+    argument "NAME",   "the name to use for the application"
+    option   "stack",  "the target stack for the application"
+    option   "remote", "the git remote to use"
 
-  puts "STATUS:#{status} HEADERS:#{headers.inspect} BODY:#{body}"
+    action do
+      display "creating your app..."
+      execute "create app"
+    end
+  end
 
-  halt status, headers, body
+  command "destroy <NAME>", "destroy an application" do
+
+    argument "NAME",   "the name of the application to destroy"
+
+    action do
+      display "touching your foo"
+      execute "touch foo"
+    end
+  end
+
+end
+
+group "Other Group" do
+
+  command "other:test", "do something" do
+
+    action do
+      display "creating your app..."
+      execute "create app"
+    end
+  end
+
 end
