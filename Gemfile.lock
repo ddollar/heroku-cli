@@ -6,7 +6,13 @@ PATH
 GEM
   remote: http://rubygems.org/
   specs:
+    buckshot (0.1.0)
+      shotgun
+      thin
     configuration (1.1.0)
+    crack (0.1.8)
+    daemons (1.1.0)
+    eventmachine (0.12.10)
     heroku (1.7.0)
       json_pure (~> 1.2.0)
       launchy (~> 0.3.2)
@@ -21,13 +27,21 @@ GEM
     rake (0.8.7)
     rest-client (1.6.1)
       mime-types (>= 1.16)
+    shotgun (0.8)
+      rack (>= 1.0)
     sinatra (1.0)
       rack (>= 1.0)
+    thin (1.2.7)
+      daemons (>= 1.0.9)
+      eventmachine (>= 0.12.6)
+      rack (>= 1.0.0)
 
 PLATFORMS
   ruby
 
 DEPENDENCIES
+  buckshot
+  crack
   heroku
   json
   sinatra

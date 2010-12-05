@@ -3,4 +3,5 @@
 $:.unshift File.expand_path("../../lib", __FILE__)
 require "cli"
 
-CLI.execute(ARGV)
+CLI.run(ARGV)
+

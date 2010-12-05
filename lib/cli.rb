@@ -5,9 +5,11 @@ require "pp"
 
 class CLI
 
-  def self.execute(args)
+  class UnknownCommand < StandardError; end
+
+  def self.run(args)
     path   = args.dup.shift.to_s
-    params = parse_command_line(args)
+    params = parse_command_line(args[1..-1])
 
     if path == "help"
       path = args[1]
@@ -15,29 +17,44 @@ class CLI
     else
       body = cli_server["/#{path.to_s.gsub(':', '/')};#{params[:args].join(";")}"].post(params[:options], headers)
 
-      JSON.parse(body).each do |(command, data)|
+      JSON.parse(body)["commands"].each do |(command, data)|
         case command
-        when "display" then
-          puts data
-        when "warning" then
-          puts "WARNING: #{data}"
-        when "error" then
-          puts "ERROR: #{data}"
-        when "confirm" then
-          puts data
-          execute(args.concat["--confirm=#{STDIN.gets.strip}"])
-        when "execute" then
-          puts "Executing: #{data}"
-          print "Is this OK? (y/N): "
-          system data if STDIN.gets.strip[0..0].upcase == "Y"
-        else
-          puts "unknown"
+          when "display" then display(data)
+          when "warning" then warning(data)
+          when "error"   then error(data)
+          when "confirm" then confirm(data, args)
+          when "execute" then execute(data)
+          else                raise UnknownCommand
         end
       end
     end
+  rescue RestClient::ResourceNotFound
+    puts "invalid command"
   end
 
-private ######################################################################
+  def self.display(message)
+    puts message
+  end
+
+  def self.warning(message)
+    puts "WARNING: #{message}"
+  end
+
+  def self.error(message)
+    puts "ERROR: #{message}"
+  end
+
+  def self.confirm(message="are you sure?", args)
+    print "#{message} [y/N]: "
+    run(args.concat(["--confirm=#{STDIN.gets.strip}"]))
+  end
+
+  def self.execute(command)
+    puts "executing: #{command}"
+    system "#{command} 2>&1"
+  end
+
+  private ######################################################################
 
   def self.parse_command_line(command_line_args)
     args    = []
@@ -64,7 +81,7 @@ private ######################################################################
   def self.cli_server
     #RestClient.log = Logger.new(STDOUT)
     @cli_server ||= RestClient::Resource.new(
-      "http://localhost:9393",
+      "http://localhost:5000",
       "david+smoke@heroku.com",
       "12345"
     )
