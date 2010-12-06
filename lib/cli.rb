@@ -28,6 +28,8 @@ class CLI
         end
       end
     end
+  rescue RestClient::Unauthorized
+    puts "invalid credentials"
   rescue RestClient::ResourceNotFound
     puts "invalid command"
   end

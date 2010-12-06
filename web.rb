@@ -19,14 +19,10 @@ before do |request|
   if auth.provided? && auth.basic? && auth.credentials
     @@username = auth.credentials.first
     @@password = auth.credentials.last
-  else
-    response['WWW-Authenticate'] = %{Basic realm="HTTP Auth"}
-    throw(:halt, [401, "Not Authorized\n"])
   end
 end
 
 def username
-  puts "USERNAME: #{@@username}"
   @@username
 end
 
@@ -47,6 +43,11 @@ error_handler RestClient::UnprocessableEntity do
     parsed = Crack::JSON.parse(exception.response.to_s)
     error  parsed.inspect
   end
+end
+
+error_handler RestClient::Unauthorized do
+  response['WWW-Authenticate'] = %{Basic realm="HTTP Auth"}
+  throw(:halt, [401, "Not Authorized\n"])
 end
 
 group "General Commands" do
