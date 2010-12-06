@@ -8,31 +8,15 @@ disable :logging
 
 extend Sinatra::CLI
 
-use Rack::Auth::Basic do |username, password|
-  @@username = username
-  @@password = password
-end
-
 before do |request|
   auth = Rack::Auth::Basic::Request.new(request.env)
-  puts auth.inspect
   if auth.provided? && auth.basic? && auth.credentials
-    @@username = auth.credentials.first
-    @@password = auth.credentials.last
+    heroku = Heroku::Client.new(auth.credentials.first, auth.credentials.last)
+    request.env['cli.username'] = auth.credentials.first
+    request.env['cli.heroku']   = heroku
+  else
+    unauthorized(response)
   end
-end
-
-def username
-  @@username
-end
-
-def password
-  @@password
-end
-
-def heroku
-  RestClient.log = Logger.new(STDOUT)
-  @heroku ||= Heroku::Client.new(username, password)
 end
 
 error_handler RestClient::UnprocessableEntity do
@@ -46,8 +30,20 @@ error_handler RestClient::UnprocessableEntity do
 end
 
 error_handler RestClient::Unauthorized do
+  unauthorized(response)
+end
+
+def unauthorized(response)
   response['WWW-Authenticate'] = %{Basic realm="HTTP Auth"}
   throw(:halt, [401, "Not Authorized\n"])
+end
+
+def heroku
+  request.env['cli.heroku']
+end
+
+def username
+  request.env['cli.username']
 end
 
 group "General Commands" do
@@ -95,11 +91,14 @@ end
 group "Other Group" do
 
   command "other:test", "do something" do
-
     action do
-      display "creating your app..."
-      execute "create app"
+      display "executing"
     end
   end
 
 end
+
+group "External Addons" do
+  redirect "someaddon", "Some Addon", "http://localhost:5100"
+end
+

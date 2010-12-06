@@ -7,15 +7,15 @@ class CLI
 
   class UnknownCommand < StandardError; end
 
-  def self.run(args)
+  def self.run(args, server=nil)
     path   = args.dup.shift.to_s
     params = parse_command_line(args[1..-1])
 
     if path == "help"
       path = args[1]
-      puts cli_server["/#{path.to_s.gsub(':', '/')}"].get(headers)
+      puts cli_server(server)["/#{path.to_s.gsub(':', '/')}"].get(headers)
     else
-      body = cli_server["/#{path.to_s.gsub(':', '/')};#{params[:args].join(";")}"].post(params[:options], headers)
+      body = cli_server(server)["/#{path.to_s.gsub(':', '/')};#{params[:args].join(";")}"].post(params[:options], headers)
 
       JSON.parse(body)["commands"].each do |(command, data)|
         case command
@@ -28,6 +28,8 @@ class CLI
         end
       end
     end
+  rescue RestClient::Found => ex
+    run(args, ex.response.headers[:location])
   rescue RestClient::Unauthorized
     puts "invalid credentials"
   rescue RestClient::ResourceNotFound
@@ -80,10 +82,12 @@ class CLI
     }
   end
 
-  def self.cli_server
+  def self.cli_server(server=nil)
+    server ||= "http://localhost:5000"
+
     #RestClient.log = Logger.new(STDOUT)
-    @cli_server ||= RestClient::Resource.new(
-      "http://localhost:5000",
+    RestClient::Resource.new(
+      server,
       "david+smoke@heroku.com",
       "12345"
     )
