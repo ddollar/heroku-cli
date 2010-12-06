@@ -31,6 +31,7 @@ GEM
       rack (>= 1.0)
     sinatra (1.0)
       rack (>= 1.0)
+    term-ansicolor (1.0.5)
     thin (1.2.7)
       daemons (>= 1.0.9)
       eventmachine (>= 0.12.6)
@@ -46,3 +47,4 @@ DEPENDENCIES
   json
   sinatra
   sinatra-cli!
+  term-ansicolor

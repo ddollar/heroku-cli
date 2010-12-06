@@ -8,11 +8,9 @@ disable :logging
 
 extend Sinatra::CLI
 
-group "Test Addon" do
+group "Test Addon", :prefix => "someaddon" do
 
-  command "someaddon:foo [ARG]", "foo the addon" do
-    argument "ARG",    "the argument"
-    option   "test",   "test option"
+  command "foo [ARG]", "foo the addon" do
     option   "test2",  "another test option"
 
     action do

@@ -2,8 +2,11 @@ require "json"
 require "logger"
 require "rest-client"
 require "pp"
+require "term/ansicolor"
 
 class CLI
+
+  extend Term::ANSIColor
 
   class UnknownCommand < StandardError; end
 
@@ -14,10 +17,11 @@ class CLI
 
     if path == "help"
       path = args[1]
-      puts server["/#{path.to_s.gsub(':', '/')}"].get(headers)
+      #print_header
+      puts server[build_path(path)].get(headers)
     else
-      body = server["/#{path.to_s.gsub(':', '/')};#{params[:args].join(";")}"].post(params[:options], headers)
-
+      body = server[build_path(path, params[:args])].post(params[:options], headers)
+      #print_header
       JSON.parse(body)["commands"].each do |(command, data)|
         case command
           when "display" then display(data)
@@ -37,6 +41,10 @@ class CLI
     puts "invalid command"
   end
 
+  def self.build_path(path, args=[])
+    [ path.to_s.gsub(":", "/") ].concat(args).join(";")
+  end
+
   def self.display(message)
     puts message
   end
@@ -46,7 +54,7 @@ class CLI
   end
 
   def self.error(message)
-    puts "ERROR: #{message}"
+    puts red { message }
   end
 
   def self.confirm(message="are you sure?", args)
@@ -55,11 +63,26 @@ class CLI
   end
 
   def self.execute(command)
-    puts "executing: #{command}"
-    system "#{command} 2>&1"
+    puts red { "\n#{command}" }
+    output = %x{ #{command} 2>&1 }
+    print black { bold { format_execute_output(output) } }
   end
 
   private ######################################################################
+
+  def self.username
+    "david+smoke@heroku.com"
+  end
+
+  def self.print_header
+    print magenta { bold { "Heroku" } }
+    puts  magenta + " [" + black + bold + username + reset + magenta + "]" + reset
+    puts
+  end
+
+  def self.format_execute_output(output)
+    "  " + output.gsub("\n", "\n  ")
+  end
 
   def self.parse_command_line(command_line_args)
     args    = []
@@ -89,7 +112,7 @@ class CLI
     #RestClient.log = Logger.new(STDOUT)
     RestClient::Resource.new(
       server,
-      "david+smoke@heroku.com",
+      username,
       "12345"
     )
   end

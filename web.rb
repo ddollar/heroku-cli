@@ -54,10 +54,13 @@ group "General Commands" do
     option   "remote", "the git remote to use"
 
     action do
-      app = heroku.create(args.first, options)
+      app    = heroku.create(args.first, options)
+      remote = options["remote"] || "heroku"
+
       display "created application: #{app}"
       display "  url: http://#{app}.heroku.com/"
       display "  git: git@heroku.com:#{app}.git"
+      execute "git remote add #{remote} git@heroku.com:#{app}.git"
     end
   end
 
