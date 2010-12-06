@@ -10,12 +10,13 @@ class CLI
   def self.run(args, server=nil)
     path   = args.dup.shift.to_s
     params = parse_command_line(args[1..-1])
+    server = cli_server(server)
 
     if path == "help"
       path = args[1]
-      puts cli_server(server)["/#{path.to_s.gsub(':', '/')}"].get(headers)
+      puts server["/#{path.to_s.gsub(':', '/')}"].get(headers)
     else
-      body = cli_server(server)["/#{path.to_s.gsub(':', '/')};#{params[:args].join(";")}"].post(params[:options], headers)
+      body = server["/#{path.to_s.gsub(':', '/')};#{params[:args].join(";")}"].post(params[:options], headers)
 
       JSON.parse(body)["commands"].each do |(command, data)|
         case command
