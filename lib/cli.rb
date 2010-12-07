@@ -57,7 +57,7 @@ class CLI
     puts red { message }
   end
 
-  def self.confirm(message="are you sure?", args)
+  def self.confirm(message="are you sure?", args={})
     print "#{message} [y/N]: "
     run(args.concat(["--confirm=#{STDIN.gets.strip}"]))
   end
