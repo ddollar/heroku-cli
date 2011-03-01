@@ -1,5 +1,6 @@
-PATH
-  remote: /Users/david/Code/sinatra-cli
+GIT
+  remote: http://github.com/ddollar/sinatra-cli.git
+  revision: 093d98ff531cb17219c03da33bb8ab1130b65b9f
   specs:
     sinatra-cli (0.0.1)
 
