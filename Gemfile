@@ -4,7 +4,7 @@ gem "crack"
 gem "heroku"
 gem "json"
 gem "sinatra"
-gem "sinatra-cli", :path => "/Users/david/Code/sinatra-cli"
+gem "sinatra-cli", :git => "http://github.com/ddollar/sinatra-cli.git"
 gem "term-ansicolor"
 
 group :development do
