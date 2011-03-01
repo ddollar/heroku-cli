@@ -46,6 +46,11 @@ def username
   request.env['cli.username']
 end
 
+def get_app
+  error "invalid options, make sure to use --app=APPNAME" if options["app"] == "true"
+  options["app"] || error("must specify an app with --app=APPNAME")
+end
+
 group "General Commands" do
 
   command "create [NAME]", "create a new application" do
@@ -64,12 +69,11 @@ group "General Commands" do
     end
   end
 
-  command "destroy <NAME>", "destroy an application" do
-    argument "NAME",   "the name of the application to destroy"
+  command "destroy", "destroy an application" do
+    option "name", "the app to destroy"
 
     action do
-      app = args.first
-      error "must specify an app name to delete" unless app
+      app = get_app
       confirm "are you sure you want to delete #{app}?" do
         begin
           heroku.destroy(app)
@@ -89,6 +93,32 @@ group "General Commands" do
     end
   end
 
+  command "info", "get information about a specific app" do
+    action do
+      app = get_app
+      begin
+        info = heroku.info(app)
+      rescue RestClient::ResourceNotFound
+        error "no such app"
+      end
+
+      addon_names = info[:addons].map { |a| a["description"] }.sort
+      collaborators = info[:collaborators].map { |c| c["email"] }.sort - [username]
+
+      display "=== #{app}"
+      display "Web URL:       http://#{app}.heroku.com/"
+      display "Git Repo:      git@heroku.com:#{app}.git"
+      display "Dynos:         #{info[:dynos]}"
+      display "Workers:       #{info[:workers]}"
+      display "Repo Size:     #{info[:repo_size]}"
+      display "Slug Size:     #{info[:slug_size]}"
+      display "Stack:         #{info[:stack]}"
+      display "Addons:        #{addon_names.join(", ")}"
+      display "Owner:         #{info[:owner]}"
+      display "Collaborators: #{collaborators.join(", ")}" unless collaborators.empty?
+      display info.inspect
+    end
+  end
 end
 
 group "Other Group" do
