@@ -18,6 +18,4 @@ Interesting files:
     web.rb
     addon.rb
 
-Most of the logic is here:
-
-http://github.com/ddollar/sinatra-cli
+The CLI-over-HTTP bits are in [sinatra-cli](http://github.com/ddollar/sinatra-cli)
